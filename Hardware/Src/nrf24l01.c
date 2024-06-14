@@ -1,6 +1,9 @@
 #include "nrf24l01.h"
 #include "spi.h"
 
+// 配对密码
+uint8_t NRF24L01_PAIR[] = {0xE1, 0xE2, 0xE3, 0xE4, 0xE5};
+
 // NRF24L01发送接收数据宽度定义
 // 5字节的地址宽度
 #define TX_ADR_WIDTH 5
@@ -122,18 +125,12 @@ void NRF24L01_Init(void) {
     NRF24L01_USE_RX();
   } while (NRF24L01_Check() != HAL_OK);
 }
-// 配对密码
-static struct {
-  uint8_t TX[5];  // 本地地址
-  uint8_t RX[5];  // 目标地址
-} NRF24L01_PAIR = {{0xE1, 0xE2, 0xE3, 0xE4, 0xE5},
-                   {0xE1, 0xE2, 0xE3, 0xE4, 0xE5}};
 
 // 接收模式
 HAL_StatusTypeDef NRF24L01_USE_RX(void) {
   SPI_CE_EN();  // 发射使能
   // 设置目标地址
-  NRF24L01_Send_Data(RX_ADDR_P0, NRF24L01_PAIR.RX, RX_ADR_WIDTH);
+  NRF24L01_Send_Data(RX_ADDR_P0, NRF24L01_PAIR, RX_ADR_WIDTH);
   // 启用通道0的自动应答功能
   NRF24L01_Send_Reg(EN_AA, 0x00);
   // 启用通道0的接收地址

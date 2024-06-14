@@ -1,5 +1,6 @@
 #include "task.h"
 #include <stdint.h>
+#include "jlinkp.h"
 #include "mpu6050.h"
 #include "pid.h"
 #include "stm32f1xx_hal.h"
@@ -31,9 +32,16 @@ void GW_Task_1ms(void) {
       jlink("MPU6050_Read_Angle FAILD\n");
     }
     // jlink("Angle(%f, %f, %f)\n", angle->Pitch, angle->Roll, angle->Yaw);
+    // char data[128] = {0};
+    // strcat(data, "Angle(");
+    // strcat(data, ftoa(GWS_Angle.Pitch));
+    // strcat(data, ", ");
+    // strcat(data, ftoa(GWS_Angle.Roll));
+    // strcat(data, ", ");
+    // strcat(data, ftoa(GWS_Angle.Yaw));
+    // strcat(data, ")\n");
+    // CDC_Transmit_FS((uint8_t*)data, strlen(data));
     GW_PID_Angle(RA_DT_S);
-    // char data[] = "Hello USB\n";
-    // CDC_Transmit_FS((uint8_t*)data, sizeof(data) - 1);
     // TODO 控制电机
   }
 }

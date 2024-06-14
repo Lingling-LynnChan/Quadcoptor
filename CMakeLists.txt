@@ -50,9 +50,12 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/task.c
     Core/Src/pid.c
+    Hardware/Src/led.c
     Hardware/Src/mpu6050.c
+    Hardware/Src/nrf24l01.c
     Libs/anotc/Src/anotc.c
     Libs/kalman/Src/kalman.c
+    Libs/RTT/Src/jlinkp.c
     Libs/RTT/Src/SEGGER_RTT.c
     Libs/RTT/Src/SEGGER_RTT_printf.c
 )

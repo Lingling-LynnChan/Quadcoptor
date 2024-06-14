@@ -5,7 +5,10 @@
 extern "C" {
 #endif
 
+#include <string.h>
 #include "SEGGER_RTT.h"
+
+char* ftoa(float n);
 
 #ifdef __cplusplus
 }

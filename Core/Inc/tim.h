@@ -39,16 +39,16 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN Private defines */
-
+extern uint32_t GW_SYS_MS;
 /* USER CODE END Private defines */
 
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
 void MX_TIM4_Init(void);
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* USER CODE BEGIN Prototypes */
-void GW_Delay_Us(uint16_t us);
-void GW_Async_Delay_Ms(uint16_t us);
 void GW_TIM_START(void);
 /* USER CODE END Prototypes */
 

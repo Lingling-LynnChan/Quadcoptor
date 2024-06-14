@@ -14,6 +14,7 @@
  *      @details    All functions are preceded by the dmp_ prefix to
  *                  differentiate among MPL and general driver function calls.
  */
+#ifdef USE_DMP
 #include "inv_mpu_dmp_motion_driver.h"
 #include <math.h>
 #include <stdint.h>
@@ -1433,6 +1434,6 @@ int dmp_register_android_orient_cb(void (*func)(unsigned char)) {
   return 0;
 }
 
-/**
- *  @}
- */
+#else
+#include "main.h"
+#endif /*__USE_DMP__ */

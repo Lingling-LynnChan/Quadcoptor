@@ -17,6 +17,7 @@
  *                  MPU9150 (or MPU6050 w/ AK8975 on the auxiliary bus)
  *                  MPU9250 (or MPU6500 w/ AK8963 on the auxiliary bus)
  */
+#ifdef USE_DMP
 #include "inv_mpu.h"
 #include <math.h>
 #include <stdint.h>
@@ -3237,7 +3238,6 @@ lp_int_restore:
   st.chip_cfg.int_motion_only = 0;
   return 0;
 }
-
-/**
- *  @}
- */
+#else
+#include "main.h"
+#endif /*__USE_DMP__ */

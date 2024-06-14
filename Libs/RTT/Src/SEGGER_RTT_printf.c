@@ -331,20 +331,17 @@ static void _PrintInt(SEGGER_RTT_PRINTF_DESC* pBufferDesc,
 #include <stdint.h>
 typedef struct {
   char sign[2];
-  uint16_t integer;
-  uint16_t decimal;  // %06u
+  uint32_t integer;
+  uint32_t decimal;  // %06u
 } GW_Float;
 
 static void GW_Float_Split(float f, GW_Float* gf) {
   gf->sign[0] = f < 0 ? '-' : '\0';
   gf->sign[1] = '\0';
   f = f < 0 ? -f : f;
-  gf->integer = (uint16_t)f;
-  gf->decimal = (uint16_t)((f - gf->integer) * 1000000);
+  gf->integer = (uint32_t)f;
+  gf->decimal = (uint32_t)((f - gf->integer) * 1000000);
 }
-
-#define GF_STR "%s%u.%06u"
-#define GF_LST(gf) gf.sign, gf.integer, gf.decimal
 
 /*********************************************************************
  *
@@ -487,7 +484,8 @@ int SEGGER_RTT_vprintf(unsigned BufferIndex,
           //.
           _StoreChar(&BufferDesc, '.');
           //%06u
-          _PrintUnsigned(&BufferDesc, gf.decimal, 10u, 6u, 6u, 0u);
+          _PrintUnsigned(&BufferDesc, gf.decimal, 10u, 0, 6u,
+                         FORMAT_FLAG_PAD_ZERO);
           break;
         }
         case 'c': {

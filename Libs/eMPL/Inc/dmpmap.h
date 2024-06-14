@@ -3,6 +3,7 @@
     Copyright (C) 2011 InvenSense Corporation, All Rights Reserved.
  $
  */
+#ifdef USE_DMP
 #ifndef DMPMAP_H
 #define DMPMAP_H
 
@@ -262,3 +263,4 @@ extern "C"
 }
 #endif
 #endif // DMPMAP_H
+#endif // USE_DMP

@@ -30,7 +30,7 @@ void MX_I2C1_Init(void)
 {
 
   /* USER CODE BEGIN I2C1_Init 0 */
-  
+
   /* USER CODE END I2C1_Init 0 */
 
   /* USER CODE BEGIN I2C1_Init 1 */
@@ -50,7 +50,7 @@ void MX_I2C1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN I2C1_Init 2 */
-  
+
   /* USER CODE END I2C1_Init 2 */
 
 }
@@ -109,5 +109,30 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
+HAL_StatusTypeDef GW_I2C1_Read_Byte(uint16_t daddr,
+                                    uint16_t addr,
+                                    uint8_t* data) {
+  return HAL_I2C_Mem_Read(&hi2c1, daddr, addr, I2C_MEMADD_SIZE_8BIT, data, 1,
+                          0xffff);
+}
+HAL_StatusTypeDef GW_I2C1_Send_Byte(uint16_t daddr,
+                                    uint16_t addr,
+                                    uint8_t data) {
+  return HAL_I2C_Mem_Write(&hi2c1, daddr, addr, I2C_MEMADD_SIZE_8BIT, &data, 1,
+                           0xffff);
+}
+HAL_StatusTypeDef GW_I2C1_Read_Data(uint16_t daddr,
+                                    uint16_t addr,
+                                    uint8_t* data,
+                                    uint16_t len) {
+  return HAL_I2C_Mem_Read(&hi2c1, daddr, addr, I2C_MEMADD_SIZE_8BIT, data, len,
+                          0xffff);
+}
+HAL_StatusTypeDef GW_I2C1_Send_Data(uint16_t daddr,
+                                    uint16_t addr,
+                                    uint8_t* data,
+                                    uint16_t len) {
+  return HAL_I2C_Mem_Write(&hi2c1, daddr, addr, I2C_MEMADD_SIZE_8BIT, data, len,
+                           0xffff);
+}
 /* USER CODE END 1 */

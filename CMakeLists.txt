@@ -50,8 +50,10 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/task.c
     Hardware/Src/mpu6050.c
+    Libs/anotc/Src/anotc.c
     Libs/eMPL/Src/inv_mpu_dmp_motion_driver.c
     Libs/eMPL/Src/inv_mpu.c
+    Libs/kalman/Src/kalman.c
     Libs/RTT/Src/SEGGER_RTT.c
     Libs/RTT/Src/SEGGER_RTT_printf.c
 )
@@ -60,7 +62,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     Hardware/Inc
+    Libs/anotc/Inc
     Libs/eMPL/Inc
+    Libs/kalman/Inc
     Libs/RTT/Inc
 )
 
@@ -69,6 +73,7 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined symbols
     EMPL_TARGET_STM32XX
     MPU6050
+    # USE_DMP
 )
 
 # Add linked libraries
@@ -87,3 +92,13 @@ add_custom_command(
 )
 
 add_custom_target(ELF2HEX ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.hex)
+
+set(JLINK_PATH "C:/Program Files (x86)/SEGGER/JLink_V612c")
+set(JLINK_TASK_FILE "${CMAKE_CURRENT_SOURCE_DIR}/.jlink/auto.task")
+
+add_custom_command(
+    TARGET ELF2HEX POST_BUILD
+    COMMAND "${JLINK_PATH}/JLink.exe" "${JLINK_TASK_FILE}"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "Running JLink with task file ${JLINK_TASK_FILE}"
+)

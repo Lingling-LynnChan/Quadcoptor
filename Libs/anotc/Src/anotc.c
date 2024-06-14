@@ -126,7 +126,7 @@ void ANOTC_Send(ANOTC_SEND type) {
     pt[i] ^= pt[i + 1];
     pt[len + 4] += pt[i] + pt[i + 1];
   }
-  CDC_Transmit_FS((uint8_t*)pt, len + 5);
+  // CDC_Transmit_FS((uint8_t*)pt, len + 5);
 }
 // 轮询发送到上位机
 void ANOTC_Polling(void) {}

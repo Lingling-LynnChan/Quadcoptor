@@ -52,8 +52,6 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/pid.c
     Hardware/Src/mpu6050.c
     Libs/anotc/Src/anotc.c
-    Libs/eMPL/Src/inv_mpu_dmp_motion_driver.c
-    Libs/eMPL/Src/inv_mpu.c
     Libs/kalman/Src/kalman.c
     Libs/RTT/Src/SEGGER_RTT.c
     Libs/RTT/Src/SEGGER_RTT_printf.c
@@ -64,7 +62,6 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     Hardware/Inc
     Libs/anotc/Inc
-    Libs/eMPL/Inc
     Libs/kalman/Inc
     Libs/RTT/Inc
 )
@@ -72,9 +69,6 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add project symbols (macros)
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined symbols
-    EMPL_TARGET_STM32XX
-    MPU6050
-    # USE_DMP
 )
 
 # Add linked libraries

@@ -97,6 +97,7 @@ Additional information:
 #ifndef BUFFER_SIZE_UP
 #define BUFFER_SIZE_UP \
   1024  // Size of the buffer for terminal output of target, up to host
+
 #endif
 
 #ifndef BUFFER_SIZE_DOWN
@@ -108,11 +109,13 @@ Additional information:
 #ifndef SEGGER_RTT_MAX_NUM_UP_BUFFERS
 #define SEGGER_RTT_MAX_NUM_UP_BUFFERS \
   2  // Number of up-buffers (T->H) available on this target
+
 #endif
 
 #ifndef SEGGER_RTT_MAX_NUM_DOWN_BUFFERS
 #define SEGGER_RTT_MAX_NUM_DOWN_BUFFERS \
   2  // Number of down-buffers (H->T) available on this target
+
 #endif
 
 #ifndef SEGGER_RTT_BUFFER_SECTION

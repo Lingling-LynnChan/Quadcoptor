@@ -63,7 +63,7 @@ EndBSPDependencies */
 /** @defgroup USBD_CDC_Private_FunctionPrototypes
   * @{
   */
-
+#include <stdint.h>
 static int8_t TEMPLATE_Init(void);
 static int8_t TEMPLATE_DeInit(void);
 static int8_t TEMPLATE_Control(uint8_t cmd, uint8_t *pbuf, uint16_t length);

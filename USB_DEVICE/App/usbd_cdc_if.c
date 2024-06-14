@@ -136,8 +136,19 @@ static int8_t CDC_Receive_FS(uint8_t* pbuf, uint32_t* Len);
  * @}
  */
 
-USBD_CDC_ItfTypeDef USBD_Interface_fops_FS = {CDC_Init_FS, CDC_DeInit_FS,
-                                              CDC_Control_FS, CDC_Receive_FS};
+USBD_CDC_ItfTypeDef USBD_Interface_fops_FS = {
+    CDC_Init_FS,     //
+    CDC_DeInit_FS,   //
+    CDC_Control_FS,  //
+    CDC_Receive_FS   //
+};
+
+USBD_CDC_LineCodingTypeDef linecoding = {
+    115200, /* baud rate*/
+    0x00,   /* stop bits-1*/
+    0x00,   /* parity - none*/
+    0x08    /* nb. of bits 8*/
+};
 
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -213,11 +224,21 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length) {
       /* 6      | bDataBits  |   1   | Number Data bits (5, 6, 7, 8 or 16). */
       /*******************************************************************************/
     case CDC_SET_LINE_CODING:
-
+      linecoding.bitrate = (uint32_t)(pbuf[0] | (pbuf[1] << 8) |
+                                      (pbuf[2] << 16) | (pbuf[3] << 24));
+      linecoding.format = pbuf[4];
+      linecoding.paritytype = pbuf[5];
+      linecoding.datatype = pbuf[6];
       break;
 
     case CDC_GET_LINE_CODING:
-
+      pbuf[0] = (uint8_t)(linecoding.bitrate);
+      pbuf[1] = (uint8_t)(linecoding.bitrate >> 8);
+      pbuf[2] = (uint8_t)(linecoding.bitrate >> 16);
+      pbuf[3] = (uint8_t)(linecoding.bitrate >> 24);
+      pbuf[4] = linecoding.format;
+      pbuf[5] = linecoding.paritytype;
+      pbuf[6] = linecoding.datatype;
       break;
 
     case CDC_SET_CONTROL_LINE_STATE:
@@ -256,8 +277,8 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t* Len) {
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-  // TODO 接收到数据
-  return (USBD_OK);
+
+  return USBD_OK;
   /* USER CODE END 6 */
 }
 

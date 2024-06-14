@@ -226,6 +226,14 @@ int SEGGER_RTT_TerminalOut(char TerminalId, const char* s);
  */
 int SEGGER_RTT_printf(unsigned BufferIndex, const char* sFormat, ...);
 #define jlink(...) SEGGER_RTT_printf(0, __VA_ARGS__)
+#include <stdint.h>
+typedef struct {
+  char sign[2];
+  uint32_t integer;
+  uint32_t decimal;  // %06u
+} GW_Float;
+void GW_Float_Split(float f, GW_Float* gf);
+
 #ifdef __cplusplus
 }
 #endif

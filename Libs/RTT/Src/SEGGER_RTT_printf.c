@@ -328,14 +328,8 @@ static void _PrintInt(SEGGER_RTT_PRINTF_DESC* pBufferDesc,
     }
   }
 }
-#include <stdint.h>
-typedef struct {
-  char sign[2];
-  uint32_t integer;
-  uint32_t decimal;  // %06u
-} GW_Float;
 
-static void GW_Float_Split(float f, GW_Float* gf) {
+void GW_Float_Split(float f, GW_Float* gf) {
   gf->sign[0] = f < 0 ? '-' : '\0';
   gf->sign[1] = '\0';
   f = f < 0 ? -f : f;

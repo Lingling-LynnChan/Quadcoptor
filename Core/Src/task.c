@@ -8,16 +8,13 @@
 
 static void GW_PID_Angle(float dt);
 
-#ifndef USE_DMP
 // 软件解算采样滤波时间(单位 ms)
 #define GW_DT_MS 3
-#endif
 // 姿态解算和PID计算时间(单位 s)
 #define RA_DT_S 0.006f
 
 void GW_Task_1ms(void) {
   HAL_StatusTypeDef hs;
-#ifndef USE_DMP
   static uint32_t cnt = 0;
   if (cnt++ >= GW_DT_MS) {
     cnt = 0;
@@ -26,7 +23,6 @@ void GW_Task_1ms(void) {
       jlink("MPU6050_Sampling FAILD\n");
     }
   }
-#endif
   static uint32_t calc_cnt = 0;
   if (calc_cnt++ >= 6) {
     calc_cnt = 0;
@@ -36,9 +32,13 @@ void GW_Task_1ms(void) {
     }
     // jlink("Angle(%f, %f, %f)\n", angle->Pitch, angle->Roll, angle->Yaw);
     GW_PID_Angle(RA_DT_S);
+    // char data[] = "Hello USB\n";
+    // CDC_Transmit_FS((uint8_t*)data, sizeof(data) - 1);
     // TODO 控制电机
-    // CDC_Transmit_FS(buff, 12);
   }
 }
+
 // 通过姿态数据控制PID
-static void GW_PID_Angle(float dt) {}
+static void GW_PID_Angle(float dt) {
+  UNUSED(dt);
+}

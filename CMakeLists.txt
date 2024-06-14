@@ -49,6 +49,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/task.c
+    Core/Src/pid.c
     Hardware/Src/mpu6050.c
     Libs/anotc/Src/anotc.c
     Libs/eMPL/Src/inv_mpu_dmp_motion_driver.c

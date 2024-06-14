@@ -143,7 +143,7 @@ HAL_StatusTypeDef MPU6050_Sampling(void) {
   // DMP不需要采样
 }
 
-HAL_StatusTypeDef MPU6050_Read_Angle(uint32_t dt) {
+HAL_StatusTypeDef MPU6050_Read_Angle(float dt) {
   UNUSED(dt);
   int err;
   const float Q30 = 1 << 30;
@@ -151,8 +151,8 @@ HAL_StatusTypeDef MPU6050_Read_Angle(uint32_t dt) {
   int16_t Sensors;
   uint8_t more;
   GW_Angle* a = &GWS_Angle;
-  err = dmp_read_fifo(a->MPU_Gyro, a->MPU_Accel, a->MPU_Quat, &Timestamp,
-                      &Sensors, &more);
+  err = dmp_read_fifo(GWS_Angle.MPU_Gyro, GWS_Angle.MPU_Accel,
+                      GWS_Angle.MPU_Quat, &Timestamp, &Sensors, &more);
   if (err) {
     return HAL_ERROR;
   }
@@ -160,22 +160,23 @@ HAL_StatusTypeDef MPU6050_Read_Angle(uint32_t dt) {
     return HAL_ERROR;
   }
   Quaternion NumQ;
-  NumQ.Q0 = a->MPU_Quat[0] / Q30;
-  NumQ.Q1 = a->MPU_Quat[1] / Q30;
-  NumQ.Q2 = a->MPU_Quat[2] / Q30;
-  NumQ.Q3 = a->MPU_Quat[3] / Q30;
-  a->Quat = NumQ;
+  NumQ.Q0 = GWS_Angle.MPU_Quat[0] / Q30;
+  NumQ.Q1 = GWS_Angle.MPU_Quat[1] / Q30;
+  NumQ.Q2 = GWS_Angle.MPU_Quat[2] / Q30;
+  NumQ.Q3 = GWS_Angle.MPU_Quat[3] / Q30;
+  GWS_Angle.Quat = NumQ;
   // 通过四元数计算欧拉角
-  a->Pitch = asinf(-2.f * (NumQ.Q1 * NumQ.Q3 + NumQ.Q0 * NumQ.Q2)) * 57.3f;
-  a->Roll = atan2(                                                     //
-                2.f * (NumQ.Q2 * NumQ.Q3 + NumQ.Q0 * NumQ.Q1),         //
-                -2.f * (NumQ.Q1 * NumQ.Q1 + NumQ.Q2 * NumQ.Q2) + 1) *  //
-            57.3f;                                                     //
-  a->Yaw = atan2(                                                      //
-               2.f * (NumQ.Q1 * NumQ.Q2 + NumQ.Q0 * NumQ.Q3),          //
-               NumQ.Q0 * NumQ.Q0 + NumQ.Q1 * NumQ.Q1 -                 //
-                   NumQ.Q2 * NumQ.Q2 - NumQ.Q3 * NumQ.Q3) *            //
-           57.3f;
+  GWS_Angle.Pitch =
+      asinf(-2.f * (NumQ.Q1 * NumQ.Q3 + NumQ.Q0 * NumQ.Q2)) * 57.3f;
+  GWS_Angle.Roll = atan2(                                                     //
+                       2.f * (NumQ.Q2 * NumQ.Q3 + NumQ.Q0 * NumQ.Q1),         //
+                       -2.f * (NumQ.Q1 * NumQ.Q1 + NumQ.Q2 * NumQ.Q2) + 1) *  //
+                   57.3f;                                                     //
+  GWS_Angle.Yaw = atan2(                                                      //
+                      2.f * (NumQ.Q1 * NumQ.Q2 + NumQ.Q0 * NumQ.Q3),          //
+                      NumQ.Q0 * NumQ.Q0 + NumQ.Q1 * NumQ.Q1 -                 //
+                          NumQ.Q2 * NumQ.Q2 - NumQ.Q3 * NumQ.Q3) *            //
+                  57.3f;
   return HAL_OK;
 }
 #else  // 软件解算
@@ -227,10 +228,8 @@ HAL_StatusTypeDef MPU6050_Init(void) {
     jlink("MPU6050 WHO_AM_I FAILD\n");
     return HAL_ERROR;
   }
-  // TODO 加载或初始化偏移数据到 Offset
-  // GWS_Angle->MPU_Gyro_Offset
-  // GWS_Angle->MPU_Accel_Offset
-  hs = MPU6050_Check();  // 偏移标定
+  // 偏移标定
+  hs = MPU6050_Check();
   if (hs != HAL_OK) {
     jlink("MPU6050 CHECK FAILD\n");
     return hs;

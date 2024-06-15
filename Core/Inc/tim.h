@@ -49,7 +49,7 @@ void MX_TIM4_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
-void GW_TIM_START(void);
+void GW_TIM_Start(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

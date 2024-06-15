@@ -16,7 +16,7 @@ typedef enum {
 
 extern GW_LED GWS_LED;
 
-void GW_LED_STATUS(void);
+void GW_LED_Status(void);
 
 #ifdef __cplusplus
 }

@@ -4,6 +4,16 @@
 // 配对密码
 uint8_t NRF24L01_PAIR[] = {0xE1, 0xE2, 0xE3, 0xE4, 0xE5};
 
+#define NRF24L01_CE_L() \
+  HAL_GPIO_WritePin(NRF24L01_CE_GPIO_Port, NRF24L01_CE_Pin, GPIO_PIN_RESET)
+#define NRF24L01_CE_H() \
+  HAL_GPIO_WritePin(NRF24L01_CE_GPIO_Port, NRF24L01_CE_Pin, GPIO_PIN_SET)
+#define NRF24L01_CSN_L() \
+  HAL_GPIO_WritePin(NRF24L01_CSN_GPIO_Port, NRF24L01_CSN_Pin, GPIO_PIN_RESET)
+#define NRF24L01_CSN_H() \
+  HAL_GPIO_WritePin(NRF24L01_CSN_GPIO_Port, NRF24L01_CSN_Pin, GPIO_PIN_SET)
+#define SPI_IRQ_RD() HAL_GPIO_ReadPin(NRF24L01_IRQ_GPIO_Port, NRF24L01_IRQ_Pin)
+
 // NRF24L01发送接收数据宽度定义
 // 5字节的地址宽度
 #define TX_ADR_WIDTH 5
@@ -42,7 +52,7 @@ uint8_t NRF24L01_PAIR[] = {0xE1, 0xE2, 0xE3, 0xE4, 0xE5};
 #define NCONFIG 0x00
 // 使能自动应答功能 bit0 ~ 5,对应通道0 ~ 5
 #define EN_AA 0x01
-// 接收地址允许,bit0~5,对应通道0~5
+// 接收地址允许,bit0 ~ 5,对应通道0 ~ 5
 #define EN_RXADDR 0x02
 // 设置地址宽度(所有数据通道)
 // bit1,0:00,3字节;01,4字节;02,5字节;
@@ -102,12 +112,20 @@ uint8_t NRF24L01_PAIR[] = {0xE1, 0xE2, 0xE3, 0xE4, 0xE5};
 #define FIFO_STATUS 0x17
 
 static HAL_StatusTypeDef NRF24L01_Check(void) {
-  uint8_t writes[5] = {0xA1, 0xA2, 0xA3, 0xA4, 0xA5};
+  uint8_t writes[5] = {0xA1, 0xB2, 0xC3, 0xD4, 0xE5};
   uint8_t reads[5];
-  NRF24L01_Send_Data(TX_ADDR, writes, 5);
-  NRF24L01_Read_Data(TX_ADDR, reads, 5);
+  HAL_StatusTypeDef hs;
+  hs = NRF24L01_Send_Data(TX_ADDR, writes, 5);
+  if (hs != HAL_OK) {
+    jlink("NRF24L01: Send Data Error\n");
+  }
+  hs = NRF24L01_Read_Data(TX_ADDR, reads, 5);
+  if (hs != HAL_OK) {
+    jlink("NRF24L01: Read Data Error\n");
+  }
   for (uint8_t i = 0; i < 5; i++) {
     if (reads[i] != writes[i]) {
+      jlink("NRF24L01: data[%u] = %02x\n", i, reads[i]);
       return HAL_ERROR;
     }
   }
@@ -115,84 +133,82 @@ static HAL_StatusTypeDef NRF24L01_Check(void) {
 }
 
 void NRF24L01_Init(void) {
-  jlink("NRF24L01: Init Begin\n");
-  SPI_CSN_DE();
-  NRF24L01_USE_RX();
+  NRF24L01_CE_L();
+  NRF24L01_CSN_H();
+  HAL_Delay(100);
+  NRF24L01_Set_Rx();
   while (NRF24L01_Check() != HAL_OK) {
     jlink("NRF24L01: Try To Use RxMode Again\n");
-    NRF24L01_USE_RX();
+    NRF24L01_Set_Rx();
   }
   jlink("NRF24L01 Init Success\n");
 }
 
 // 接收模式
-HAL_StatusTypeDef NRF24L01_USE_RX(void) {
-  SPI_CE_EN();  // 发射使能
+HAL_StatusTypeDef NRF24L01_Set_Rx(void) {
+  HAL_StatusTypeDef hs = HAL_OK;
+  NRF24L01_CE_L();  // 发射使能
   // 设置目标地址
-  NRF24L01_Send_Data(RX_ADDR_P0, NRF24L01_PAIR, RX_ADR_WIDTH);
+  hs |= NRF24L01_Send_Data(RX_ADDR_P0, NRF24L01_PAIR, RX_ADR_WIDTH);
   // 启用通道0的自动应答功能
-  NRF24L01_Send_Reg(EN_AA, 0x00);
+  hs |= NRF24L01_Send_Reg(EN_AA, 0x01);
   // 启用通道0的接收地址
-  NRF24L01_Send_Reg(EN_RXADDR, 0x01);
+  hs |= NRF24L01_Send_Reg(EN_RXADDR, 0x01);
   // 设置通信频率
-  NRF24L01_Send_Reg(RF_CH, 0x01);
+  hs |= NRF24L01_Send_Reg(RF_CH, 0x01);
   // 设置通道0的有效数据宽度
-  NRF24L01_Send_Reg(RX_PW_P0, RX_PLOAD_WIDTH);
+  hs |= NRF24L01_Send_Reg(RX_PW_P0, RX_PLOAD_WIDTH);
   // 设置TX发射参数,0db增益,2Mbps,低噪声增益开启
-  NRF24L01_Send_Reg(RF_SETUP, 0x07);
+  hs |= NRF24L01_Send_Reg(RF_SETUP, 0x07);
   // 设置基本工作模式的参数;PWR_UP,EN_CRC,16BIT_CRC,PRIM_RX接收模式
-  NRF24L01_Send_Reg(NCONFIG, 0x0f);
-  SPI_CE_DE();  // 发射失能
-  return HAL_OK;
+  hs |= NRF24L01_Send_Reg(NCONFIG, 0x0f);
+  NRF24L01_CE_H();  // 发射失能
+  return hs;
 }
 
 // 发射模式
-HAL_StatusTypeDef NRF24L01_USE_TX(void) {
+HAL_StatusTypeDef NRF24L01_Set_Tx(void) {
   // 不需要发射
   return HAL_OK;
 }
 
 HAL_StatusTypeDef NRF24L01_Send_Reg(uint8_t addr, uint8_t data) {
-  return NRF24L01_Send_Data(addr, &data, 1);
-}
-
-HAL_StatusTypeDef NRF24L01_Read_Reg(uint8_t addr, uint8_t* data) {
-  return NRF24L01_Read_Data(addr, data, 1);
+  NRF24L01_CSN_L();
+  GW_SPI_RW(SPI_WRITE_REG | addr);
+  GW_SPI_RW(data);
+  NRF24L01_CSN_H();
+  return HAL_OK;
 }
 
 HAL_StatusTypeDef NRF24L01_Send_Data(uint8_t addr, uint8_t* data, uint8_t len) {
-  HAL_StatusTypeDef hs;
-  SPI_CSN_EN();
-  uint8_t txbuf[1] = {SPI_WRITE_REG | addr};
-  hs = HAL_SPI_Transmit(&hspi2, txbuf, 1, 0xffff);
-  hs |= HAL_SPI_Transmit(&hspi2, data, len, 0xffff);
-  SPI_CSN_DE();
-  return hs;
+  NRF24L01_CSN_L();
+  GW_SPI_RW(SPI_WRITE_REG | addr);
+  for (uint8_t i = 0; i < len; i++) {
+    GW_SPI_RW(data[i]);
+  }
+  NRF24L01_CSN_H();
+  return HAL_OK;
 }
+
+HAL_StatusTypeDef NRF24L01_Read_Reg(uint8_t addr, uint8_t* data) {
+  NRF24L01_CSN_L();
+  GW_SPI_RW(SPI_READ_REG | addr);
+  *data = GW_SPI_RW(NOP);
+  NRF24L01_CSN_H();
+  return HAL_OK;
+}
+
 HAL_StatusTypeDef NRF24L01_Read_Data(uint8_t addr, uint8_t* data, uint8_t len) {
-  HAL_StatusTypeDef hs;
-  SPI_CSN_EN();
-  uint8_t txbuf[1] = {SPI_READ_REG | addr};
-  hs = HAL_SPI_Transmit(&hspi2, txbuf, 1, 0xffff);
-  hs |= HAL_SPI_Receive(&hspi2, data, len, 0xffff);
-  SPI_CSN_DE();
-  return hs;
+  NRF24L01_CSN_L();
+  GW_SPI_RW(SPI_READ_REG | addr);
+  for (uint8_t i = 0; i < len; i++) {
+    data[i] = GW_SPI_RW(NOP);
+  }
+  NRF24L01_CSN_H();
+  return HAL_OK;
 }
 HAL_StatusTypeDef NRF24L01_TxPacket(uint8_t* txbuf) {
-  SPI_CE_EN();  // 发射使能
-  NRF24L01_Send_Data(WR_TX_PLOAD, txbuf, TX_PLOAD_WIDTH);
-  SPI_CE_DE();  // 发射失能
-  while (SPI_IRQ_RD())
-    ;
-  uint8_t status;
-  NRF24L01_Read_Reg(STATUS, &status);
-  if (status & MAX_TX) {
-    NRF24L01_Send_Reg(FLUSH_TX, 0xff);
-    return HAL_TIMEOUT;
-  }
-  if (status & TX_OK) {
-    return HAL_OK;
-  }
+  // 不需要发射数据
   return HAL_ERROR;
 }
 HAL_StatusTypeDef NRF24L01_RxPacket(uint8_t* rxbuf) {

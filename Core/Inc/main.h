@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "jlinkp.h"
+#include "stdint.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -75,6 +76,12 @@ void Error_Handler(void);
 #define LED_PWM2_GPIO_Port GPIOB
 #define NRF24L01_CSN_Pin GPIO_PIN_12
 #define NRF24L01_CSN_GPIO_Port GPIOB
+#define SPI_SCK_Pin GPIO_PIN_13
+#define SPI_SCK_GPIO_Port GPIOB
+#define SPI_MISO_Pin GPIO_PIN_14
+#define SPI_MISO_GPIO_Port GPIOB
+#define SPI_MOSI_Pin GPIO_PIN_15
+#define SPI_MOSI_GPIO_Port GPIOB
 #define NRF24L01_IRQ_Pin GPIO_PIN_8
 #define NRF24L01_IRQ_GPIO_Port GPIOA
 #define NRF24L01_CE_Pin GPIO_PIN_8

@@ -9,7 +9,7 @@
 
 GW_LED GWS_LED = GW_LED_FAST;
 
-void GW_LED_STATUS(void) {
+void GW_LED_Status(void) {
   static uint32_t lastTime = 0;
   if (lastTime == 0) {
     lastTime = GW_SYS_MS;

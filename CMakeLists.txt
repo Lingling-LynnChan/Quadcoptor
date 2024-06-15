@@ -58,6 +58,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Libs/RTT/Src/jlinkp.c
     Libs/RTT/Src/SEGGER_RTT.c
     Libs/RTT/Src/SEGGER_RTT_printf.c
+    Libs/spi/Src/spi.c
 )
 
 # Add include paths
@@ -67,6 +68,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     Libs/anotc/Inc
     Libs/kalman/Inc
     Libs/RTT/Inc
+    Libs/spi/Inc
 )
 
 # Add project symbols (macros)

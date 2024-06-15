@@ -32,10 +32,8 @@ void GW_Task_1ms(void) {
     RcCnt = 0;
     uint8_t RcData[32];
     hs = NRF24L01_RxPacket(RcData);
-    if (hs != HAL_OK) {
-      CDC_Transmit_FS("NRF24L01_RxPacket FAILD\n", 24);
-    } else {
-      CDC_Transmit_FS(RcData, 32);
+    if (hs == HAL_OK) {
+      jlink("NRF24L01_RxPacket SUCCESS\n");
     }
   }
   static uint32_t RaCnt = 0;

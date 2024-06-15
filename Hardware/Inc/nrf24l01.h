@@ -8,8 +8,8 @@ extern "C" {
 #include "main.h"
 
 void NRF24L01_Init(void);
-HAL_StatusTypeDef NRF24L01_USE_RX(void);
-HAL_StatusTypeDef NRF24L01_USE_TX(void);
+HAL_StatusTypeDef NRF24L01_Set_Rx(void);
+HAL_StatusTypeDef NRF24L01_Set_Tx(void);
 HAL_StatusTypeDef NRF24L01_Send_Reg(uint8_t addr, uint8_t data);
 HAL_StatusTypeDef NRF24L01_Read_Reg(uint8_t addr, uint8_t* data);
 HAL_StatusTypeDef NRF24L01_Send_Data(uint8_t addr, uint8_t* data, uint8_t len);

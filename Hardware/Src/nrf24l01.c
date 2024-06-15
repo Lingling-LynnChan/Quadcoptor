@@ -101,18 +101,13 @@ uint8_t NRF24L01_PAIR[] = {0xE1, 0xE2, 0xE3, 0xE4, 0xE5};
 // FIFO满标志;bit6,1,循环发送上一数据包.0,不循环;
 #define FIFO_STATUS 0x17
 
-static void NRF24L01_Config(void) {
-  SPI_CE_EN();
-  SPI_CSN_DE();
-}
-
 static HAL_StatusTypeDef NRF24L01_Check(void) {
-  uint8_t writes[5] = {0xA5, 0xA5, 0xA5, 0xA5, 0xA5};
+  uint8_t writes[5] = {0xA1, 0xA2, 0xA3, 0xA4, 0xA5};
   uint8_t reads[5];
   NRF24L01_Send_Data(TX_ADDR, writes, 5);
   NRF24L01_Read_Data(TX_ADDR, reads, 5);
   for (uint8_t i = 0; i < 5; i++) {
-    if (reads[i] != 0xA5) {
+    if (reads[i] != writes[i]) {
       return HAL_ERROR;
     }
   }
@@ -120,10 +115,14 @@ static HAL_StatusTypeDef NRF24L01_Check(void) {
 }
 
 void NRF24L01_Init(void) {
-  NRF24L01_Config();
-  do {
+  jlink("NRF24L01: Init Begin\n");
+  SPI_CSN_DE();
+  NRF24L01_USE_RX();
+  while (NRF24L01_Check() != HAL_OK) {
+    jlink("NRF24L01: Try To Use RxMode Again\n");
     NRF24L01_USE_RX();
-  } while (NRF24L01_Check() != HAL_OK);
+  }
+  jlink("NRF24L01 Init Success\n");
 }
 
 // 接收模式
@@ -154,29 +153,17 @@ HAL_StatusTypeDef NRF24L01_USE_TX(void) {
 }
 
 HAL_StatusTypeDef NRF24L01_Send_Reg(uint8_t addr, uint8_t data) {
-  HAL_StatusTypeDef hs;
-  SPI_CSN_EN();
-  uint8_t txbuf[2] = {SPI_WRITE_REG | addr, data};
-  hs = HAL_SPI_Transmit(&hspi2, txbuf, 2, 0xffff);
-  SPI_CSN_DE();
-  return hs;
+  return NRF24L01_Send_Data(addr, &data, 1);
 }
 
 HAL_StatusTypeDef NRF24L01_Read_Reg(uint8_t addr, uint8_t* data) {
-  HAL_StatusTypeDef hs;
-  SPI_CSN_EN();
-  uint8_t rxbuf[2];
-  uint8_t txbuf[2] = {SPI_READ_REG | addr, 0xff};
-  hs = HAL_SPI_TransmitReceive(&hspi2, txbuf, rxbuf, 2, 0xffff);
-  SPI_CSN_DE();
-  *data = rxbuf[1];
-  return hs;
+  return NRF24L01_Read_Data(addr, data, 1);
 }
 
 HAL_StatusTypeDef NRF24L01_Send_Data(uint8_t addr, uint8_t* data, uint8_t len) {
   HAL_StatusTypeDef hs;
   SPI_CSN_EN();
-  uint8_t txbuf[1] = {SPI_READ_REG | addr};
+  uint8_t txbuf[1] = {SPI_WRITE_REG | addr};
   hs = HAL_SPI_Transmit(&hspi2, txbuf, 1, 0xffff);
   hs |= HAL_SPI_Transmit(&hspi2, data, len, 0xffff);
   SPI_CSN_DE();
@@ -211,6 +198,7 @@ HAL_StatusTypeDef NRF24L01_TxPacket(uint8_t* txbuf) {
 HAL_StatusTypeDef NRF24L01_RxPacket(uint8_t* rxbuf) {
   uint8_t status;
   NRF24L01_Read_Reg(STATUS, &status);
+  NRF24L01_Send_Reg(STATUS, status);
   if (status & RX_OK) {
     NRF24L01_Read_Data(RD_RX_PLOAD, rxbuf, RX_PLOAD_WIDTH);
     NRF24L01_Send_Reg(FLUSH_RX, 0xff);
